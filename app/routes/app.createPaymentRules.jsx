@@ -1,5 +1,7 @@
 // app/routes/template.new-rules.jsx
+// Page for creating and managing payment rules in the app.
 
+// Import UI components from Shopify Polaris for layout, forms, and modals
 import {
     Page,
     Card,
@@ -12,10 +14,15 @@ import {
     Box,
     Modal,
 } from "@shopify/polaris";
+// Import React's useState for local state management
 import { useState } from "react";
 
+console.log('[app.createPaymentRules.jsx] Component: Render start');
+
+// Main component for the Create Payment Rules page
 export default function NewRulePage() {
     console.log("[app.createPaymentRules.jsx] Component: Render");
+    // State for form visibility and rule fields
     const [formVisible, setFormVisible] = useState(null); // 'Hide', 'Rename', 'Sort' or null
     const [title, setTitle] = useState("");
     const [action, setAction] = useState("Hide");
@@ -26,6 +33,7 @@ export default function NewRulePage() {
     const [modalActive, setModalActive] = useState(false);
     const [rules, setRules] = useState([]);
 
+    // Handle form submission to create a new rule
     const handleCreateRule = (e) => {
         e.preventDefault();
         const newRule = {
@@ -47,24 +55,23 @@ export default function NewRulePage() {
         setThenAction("Hide specific payment method");
     };
 
+    // Options for select dropdowns in the form
     const actionOptions = [
         { label: "Hide", value: "Hide" },
         { label: "Rename", value: "Rename" },
         { label: "Sort", value: "Sort" }
     ];
-
     const operatorOptions = [
         { label: "equal or greater than", value: "equal or greater than" },
         { label: "equal or less than", value: "equal or less than" },
         { label: "equal to", value: "equal to" }
     ];
-
     const thenActionOptions = [
         { label: "Hide specific payment method", value: "Hide specific payment method" },
         { label: "Show specific payment method", value: "Show specific payment method" }
     ];
 
-    // Helper to render the form
+    // Render the form for creating a rule of a given type
     function renderForm(type) {
         console.log(`[app.createPaymentRules.jsx] renderForm: type = ${type}`);
         return (
@@ -190,6 +197,9 @@ export default function NewRulePage() {
         );
     }
 
+    console.log('[app.createPaymentRules.jsx] Loader data:', loaderData);
+
+    // Main layout: sections for Hide, Rename, and Sort rules, each with a form
     return (
         <Page
             backAction={{ content: "Back", url: "/app" }}
@@ -197,7 +207,7 @@ export default function NewRulePage() {
             primaryAction={{ content: "Dashboard", url: "/app" }}
         >
             <BlockStack gap="500">
-                {/* Hide Section */}
+                {/* Hide Section: create and list Hide rules */}
                 <Card>
                     <Box padding="400">
                         <InlineStack align="space-between">
@@ -217,7 +227,7 @@ export default function NewRulePage() {
                 </Card>
                 {formVisible === 'Hide' && renderForm('Hide')}
 
-                {/* Rename Section */}
+                {/* Rename Section: create and list Rename rules */}
                 <Card>
                     <Box padding="400">
                         <InlineStack align="space-between">
@@ -235,7 +245,7 @@ export default function NewRulePage() {
                 </Card>
                 {formVisible === 'Rename' && renderForm('Rename')}
 
-                {/* Sort Section */}
+                {/* Sort Section: create and list Sort rules */}
                 <Card>
                     <Box padding="400">
                         <InlineStack align="space-between">
@@ -263,6 +273,7 @@ export default function NewRulePage() {
                     <Text variant="bodyMd">Rule has been saved. You can now manually activate it.</Text>
                 </Modal.Section>
             </Modal>
+            console.log('[app.createPaymentRules.jsx] Returning main JSX');
         </Page>
     );
 }

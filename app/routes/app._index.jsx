@@ -1,11 +1,19 @@
 // app/routes/_index.jsx or app/routes/dashboard.jsx
+// Main dashboard page for the app. Shows navigation, status, and rules table.
 
-import { Page, Card, Button, BlockStack, InlineStack, Text, Box, Badge, DataTable, ButtonGroup, Icon, } from "@shopify/polaris";
+// Import core UI components from Shopify Polaris for layout, buttons, cards, and icons
+import {
+  Page, Card, Button, BlockStack, InlineStack, Text, Box, Badge, DataTable, ButtonGroup, Icon
+} from "@shopify/polaris";
+// Import specific icons for use in action buttons
 import { PlusIcon, EditIcon, DeleteIcon } from "@shopify/polaris-icons";
+// Import React's useState for managing local component state
 import { useState } from "react";
 
+// Main dashboard component
 export default function DashboardPage() {
-  console.log("[app._index.jsx] Component: Render");
+  console.log('[app._index.jsx] Component: Render start');
+  // State for rules displayed in the table
   const [rules, setRules] = useState([
     {
       id: 1,
@@ -15,6 +23,7 @@ export default function DashboardPage() {
     }
   ]);
 
+  // Toggle the enabled/disabled status of a rule by its ID
   const toggleRuleStatus = (ruleId) => {
     setRules(prevRules =>
       prevRules.map(rule =>
@@ -23,14 +32,15 @@ export default function DashboardPage() {
     );
   };
 
+  // Delete a rule by its ID
   const deleteRule = (ruleId) => {
     setRules(prevRules => prevRules.filter(rule => rule.id !== ruleId));
   };
 
+  // Prepare table rows for displaying rules and their actions
   const tableRows = rules.map(rule => [
     rule.title,
     rule.ruleSetType,
-
     <Button
       key={`toggle-${rule.id}`}
       variant={rule.status ? "primary" : "tertiary"}
@@ -58,13 +68,16 @@ export default function DashboardPage() {
     </InlineStack>
   ]);
 
+  console.log('[app._index.jsx] Loader data:', loaderData);
+
+  // Main dashboard layout with navigation, status cards, and rules table
   return (
     <Page
       title="Landing Page/ Homepage"
       titleMetadata={<Badge tone="info">Dashboard</Badge>}
     >
       <BlockStack gap="500">
-        {/* Top Navigation Buttons */}
+        {/* Navigation buttons for quick access to other pages */}
         <Card>
           <Box padding="400">
             <InlineStack gap="300" wrap={false}>
@@ -88,7 +101,7 @@ export default function DashboardPage() {
           </Box>
         </Card>
 
-        {/* Status Cards */}
+        {/* Status cards showing sync and rules info */}
         <InlineStack gap="400" align="start">
           <Card>
             <Box padding="400">
@@ -113,7 +126,7 @@ export default function DashboardPage() {
           </Card>
         </InlineStack>
 
-        {/* Active Rules Summary */}
+        {/* Table of rules with actions */}
         <Card>
           <Box padding="400">
             <BlockStack gap="400">
@@ -174,6 +187,7 @@ export default function DashboardPage() {
           </Box>
         </Card>
       </BlockStack>
+      console.log('[app._index.jsx] Returning main JSX');
     </Page>
   );
 }

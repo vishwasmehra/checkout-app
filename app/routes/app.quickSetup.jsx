@@ -1,3 +1,7 @@
+// app/routes/app.quickSetup.jsx
+// Quick Setup wizard page for creating rules using templates or custom input.
+
+// Import UI components from Shopify Polaris for layout, forms, and actions
 import {
     Page,
     Card,
@@ -12,12 +16,15 @@ import {
     Badge,
     Icon,
 } from "@shopify/polaris";
+// Import icon for add action button
 import { PlusIcon } from "@shopify/polaris-icons";
-import { title } from "process";
+// Import React's useState for local state management
 import { useState } from "react";
 
+// Main component for the Quick Setup page
 export default function CreateRulePage() {
-    console.log("[app.quickSetup.jsx] Component: Render");
+    console.log('[app.quickSetup.jsx] Component: Render start');
+    // State for available templates and selected templates
     const [templateRules, setTemplateRules] = useState([
         "Hide COD when cart total reaches",
         "Hide COD for Internation Customers",
@@ -27,6 +34,7 @@ export default function CreateRulePage() {
         "zzz",
     ]);
     const [selectedTemplates, setSelectedTemplates] = useState([]);
+    // State for custom rule fields
     const [customRule, setCustomRule] = useState({
         title: "whoremember",
         action: "Hide",
@@ -36,6 +44,7 @@ export default function CreateRulePage() {
         thenAction: "Hide specific payment method",
     });
 
+    // Toggle selection of a template rule
     const handleTemplateToggle = (label) => {
         console.log(`[app.quickSetup.jsx] handleTemplateToggle: label = ${label}`);
         setSelectedTemplates((prev) =>
@@ -45,21 +54,25 @@ export default function CreateRulePage() {
         );
     };
 
+    console.log('[app.quickSetup.jsx] Loader data:', loaderData);
+
+    // Main layout: template selection, custom rule form, and navigation
     return (
         <Page title="Create New Rule">
             <BlockStack gap="500">
+                {/* Navigation button to go back to dashboard */}
                 <InlineStack gap="300" wrap={false}>
-
                     <Button variant="secondary" url="/app" >Dashboard</Button>
                 </InlineStack>
 
+                {/* Card for selecting premade templates */}
                 <Card>
                     <Box padding="400">
                         <BlockStack gap="400">
                             <Text variant="headingLg" as="h2">
                                 Premade Template
                             </Text>
-
+                            {/* List of template rules with checkboxes */}
                             {templateRules.map((label, idx) => (
                                 <Checkbox
                                     key={idx}
@@ -74,6 +87,7 @@ export default function CreateRulePage() {
                     </Box>
                 </Card>
 
+                {/* Custom rule creation form */}
                 <Card>
                     <Box padding="400">
                         <BlockStack gap="400">
@@ -191,12 +205,13 @@ export default function CreateRulePage() {
                     </Box>
                 </Card>
 
+                {/* Action buttons for creating rule and navigation */}
                 <InlineStack align="end">
                     <Button variant="primary" onClick={() => console.log("[app.quickSetup.jsx] Button: CREATE RULE clicked")}>CREATE RULE</Button>
                 </InlineStack>
-
                 <Button variant="tertiary">Back</Button>
             </BlockStack>
+            console.log('[app.quickSetup.jsx] Returning main JSX');
         </Page>
     );
 }

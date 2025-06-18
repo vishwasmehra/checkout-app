@@ -3,7 +3,7 @@
 client_id = "d0767d982a1bc98ff4f6edf281a0e33c"
 name = "ccp"
 handle = "ccp-6"
-application_url = "https://adjacent-sell-aim-version.trycloudflare.com"
+application_url = "https://dennis-carry-rb-notebook.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://adjacent-sell-aim-version.trycloudflare.com/auth/callback", "https://adjacent-sell-aim-version.trycloudflare.com/auth/shopify/callback", "https://adjacent-sell-aim-version.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://dennis-carry-rb-notebook.trycloudflare.com/auth/callback", "https://dennis-carry-rb-notebook.trycloudflare.com/auth/shopify/callback", "https://dennis-carry-rb-notebook.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
