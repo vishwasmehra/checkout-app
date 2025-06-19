@@ -54,8 +54,6 @@ export default function CreateRulePage() {
         );
     };
 
-    console.log('[app.quickSetup.jsx] Loader data:', loaderData);
-
     // Main layout: template selection, custom rule form, and navigation
     return (
         <Page title="Create New Rule">

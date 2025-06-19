@@ -197,8 +197,6 @@ export default function NewRulePage() {
         );
     }
 
-    console.log('[app.createPaymentRules.jsx] Loader data:', loaderData);
-
     // Main layout: sections for Hide, Rename, and Sort rules, each with a form
     return (
         <Page

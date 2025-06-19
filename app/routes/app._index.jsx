@@ -20,7 +20,31 @@ export default function DashboardPage() {
       title: "ertetr",
       ruleSetType: "Hide",
       status: true
-    }
+    },
+    {
+      id: 2,
+      title: "alpha",
+      ruleSetType: "Sort",
+      status: false
+    },
+    {
+      id: 3,
+      title: "beta",
+      ruleSetType: "Rename",
+      status: true
+    },
+    {
+      id: 4,
+      title: "gamma",
+      ruleSetType: "Hide",
+      status: false
+    },
+    {
+      id: 5,
+      title: "delta",
+      ruleSetType: "Sort",
+      status: true
+    },
   ]);
 
   // Toggle the enabled/disabled status of a rule by its ID
@@ -68,7 +92,10 @@ export default function DashboardPage() {
     </InlineStack>
   ]);
 
-  console.log('[app._index.jsx] Loader data:', loaderData);
+  // Calculate dynamic counts for each rule type
+  const hideCount = rules.filter(r => r.ruleSetType === "Hide").length;
+  const sortCount = rules.filter(r => r.ruleSetType === "Sort").length;
+  const renameCount = rules.filter(r => r.ruleSetType === "Rename").length;
 
   // Main dashboard layout with navigation, status cards, and rules table
   return (
@@ -101,27 +128,44 @@ export default function DashboardPage() {
           </Box>
         </Card>
 
-        {/* Status cards showing sync and rules info */}
-        <InlineStack gap="400" align="start">
+        {/* Summary cards at the top (replacing status cards) */}
+        <InlineStack gap="400" align="start" blockAlign="center" justify="space-between">
           <Card>
-            <Box padding="400">
-              <BlockStack gap="200">
-                <Text variant="bodyMd" color="subdued">Real-Time Sync :</Text>
-                <Badge tone="success">Enabled</Badge>
-                <Text variant="bodyMd" color="subdued">Shopify Functions:</Text>
-                <Badge tone="success">Installed</Badge>
-              </BlockStack>
+            <Box padding="400" minWidth="260px">
+              <Text variant="bodyMd" color="subdued">Active Payment Customizations</Text>
+              <Box paddingBlockStart="200">
+                <Text variant="headingLg" as="span">0</Text>
+                <Text variant="bodyMd" as="span"> /5 Our App active delivery rule(s)</Text>
+              </Box>
             </Box>
           </Card>
-
+          <div style={{ flex: 1 }} />
           <Card>
-            <Box padding="400">
-              <BlockStack gap="200">
-                <Text variant="bodyMd" color="subdued">Payment Method Rules:</Text>
-                <Text variant="headingMd">2 rules</Text>
-                <Text variant="bodyMd" color="subdued">Shipping Method Rules :</Text>
-                <Text variant="headingMd">8 rules</Text>
-              </BlockStack>
+            <Box padding="400" minWidth="260px">
+              <Text variant="bodyMd" color="subdued">Your activated / created rules count.</Text>
+              <InlineStack gap="200" align="center" blockAlign="center">
+                <Box textAlign="center">
+                  <Text variant="bodySm" color="subdued" as="div">Hide</Text>
+                  <Box>
+                    <Text variant="headingMd" as="span">{hideCount}</Text>
+                    <Text variant="bodySm" as="span" color="subdued"> /2</Text>
+                  </Box>
+                </Box>
+                <Box textAlign="center">
+                  <Text variant="bodySm" color="subdued" as="div">Sort</Text>
+                  <Box>
+                    <Text variant="headingMd" as="span">{sortCount}</Text>
+                    <Text variant="bodySm" as="span" color="subdued"> /2</Text>
+                  </Box>
+                </Box>
+                <Box textAlign="center">
+                  <Text variant="bodySm" color="subdued" as="div">Rename</Text>
+                  <Box>
+                    <Text variant="headingMd" as="span">{renameCount}</Text>
+                    <Text variant="bodySm" as="span" color="subdued"> /2</Text>
+                  </Box>
+                </Box>
+              </InlineStack>
             </Box>
           </Card>
         </InlineStack>
