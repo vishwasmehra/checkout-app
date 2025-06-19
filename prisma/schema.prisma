@@ -30,3 +30,15 @@ model Session {
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
 }
+
+model Rule {
+  id          String   @id @default(uuid())
+  title       String
+  ruleSetType String
+  condition   String?
+  operator    String?
+  value       String?
+  thenAction  String?
+  status      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}

@@ -15,12 +15,42 @@ import {
     Modal,
 } from "@shopify/polaris";
 // Import React's useState for local state management
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useActionData, Form, useNavigation } from "@remix-run/react";
+import RuleForm from "../RuleForm";
 
 console.log('[app.createPaymentRules.jsx] Component: Render start');
 
+export async function action({ request }) {
+    console.log('ACTION CALLED');
+    const { json, redirect } = await import("@remix-run/node");
+    const prisma = (await import('~/db.server')).default;
+    const formData = await request.formData();
+    const title = formData.get("title");
+    const ruleSetType = formData.get("action");
+    const condition = formData.get("condition");
+    const operator = formData.get("operator");
+    const value = formData.get("value");
+    const thenAction = formData.get("thenAction");
+    // Save all fields to the rule
+    const rule = await prisma.rule.create({
+        data: {
+            title: String(title),
+            ruleSetType: String(ruleSetType),
+            condition: condition ? String(condition) : null,
+            operator: operator ? String(operator) : null,
+            value: value ? String(value) : null,
+            thenAction: thenAction ? String(thenAction) : null,
+            status: false,
+        },
+    });
+    return json({ success: true, rule });
+}
+
 // Main component for the Create Payment Rules page
 export default function NewRulePage() {
+    const actionData = useActionData();
+    const navigation = useNavigation();
     console.log("[app.createPaymentRules.jsx] Component: Render");
     // State for form visibility and rule fields
     const [formVisible, setFormVisible] = useState(null); // 'Hide', 'Rename', 'Sort' or null
@@ -31,28 +61,35 @@ export default function NewRulePage() {
     const [value, setValue] = useState("");
     const [thenAction, setThenAction] = useState("Hide specific payment method");
     const [modalActive, setModalActive] = useState(false);
-    const [rules, setRules] = useState([]);
 
-    // Handle form submission to create a new rule
-    const handleCreateRule = (e) => {
-        e.preventDefault();
-        const newRule = {
-            title,
-            action,
-            condition,
-            operator,
-            value,
-            thenAction,
-        };
-        setRules([...rules, newRule]);
-        setModalActive(true);
-        setFormVisible(null);
-        setTitle("");
-        setAction("Hide");
-        setCondition("cart total amount");
-        setOperator("equal or greater than");
-        setValue("");
-        setThenAction("Hide specific payment method");
+    useEffect(() => {
+        if (actionData?.success) {
+            setModalActive(true);
+            setTitle("");
+            setAction("Hide");
+            setCondition("cart total amount");
+            setOperator("equal or greater than");
+            setValue("");
+            setThenAction("Hide specific payment method");
+            setFormVisible(null);
+        }
+    }, [actionData]);
+
+    const handleCloseModal = () => {
+        setModalActive(false);
+    };
+
+    // Metadata for each rule type
+    const ruleMeta = {
+        Hide: [
+            "Total Amount", "Subtotal Amount", "Total Weight", "Total Quantity", "Sku", "Collections", "Country", "Zipcode", "City", "Total Spend", "State/Province Code", "Customer Tags", "Delivery/Shipping Title", "Total Discount", "Discount Rate", "Shipping Cost", "Currency Code"
+        ],
+        Rename: [
+            "Always", "Country", "Language", "Customer Tags"
+        ],
+        Sort: [
+            "Country", "Shipping Title"
+        ]
     };
 
     // Options for select dropdowns in the form
@@ -73,125 +110,25 @@ export default function NewRulePage() {
 
     // Render the form for creating a rule of a given type
     function renderForm(type) {
-        console.log(`[app.createPaymentRules.jsx] renderForm: type = ${type}`);
         return (
             <Card>
                 <Box padding="400">
-                    <form onSubmit={handleCreateRule}>
-                        <BlockStack gap="400">
-                            <TextField
-                                label="Title..."
-                                name="title"
-                                value={title}
-                                onChange={(value) => setTitle(value)}
-                                placeholder="Enter rule title"
-                                required
-                            />
-                            <Select
-                                label="Choose..."
-                                name="action"
-                                options={actionOptions}
-                                value={type}
-                                onChange={(value) => { }}
-                                disabled
-                            />
-                            <InlineStack gap="300" align="start">
-                                <Box minWidth="200px">
-                                    <Select
-                                        label="When..."
-                                        name="condition"
-                                        options={[
-                                            {
-                                                title: "Cart Details",
-                                                options: [
-                                                    { label: "Total Amount", value: "total_amount" },
-                                                    { label: "SubTotal Amount", value: "subtotal_amount" },
-                                                    { label: "Total Weight", value: "total_weight" },
-                                                    { label: "Total Quantity", value: "total_quantity" },
-                                                    { label: "Total Discount", value: "total_discount" },
-                                                    { label: "Discount Rate", value: "discount_rate" },
-                                                    { label: "Shipping Cost", value: "shipping_cost" },
-                                                ],
-                                            },
-                                            {
-                                                title: "Cart Items",
-                                                options: [
-                                                    { label: "Sku", value: "sku" },
-                                                    { label: "Choose Collection", value: "choose_collection" },
-                                                ],
-                                            },
-                                            {
-                                                title: "Address",
-                                                options: [
-                                                    { label: "Country", value: "country" },
-                                                    { label: "Currency Code", value: "currency_code" },
-                                                    { label: "Province Code / State Code", value: "province_code" },
-                                                    { label: "Zip Code / Postal Code", value: "zip_code" },
-                                                    { label: "City", value: "city" },
-                                                ],
-                                            },
-                                            {
-                                                title: "Customer",
-                                                options: [
-                                                    { label: "Total Spent", value: "total_spent" },
-                                                    { label: "Customer Tag", value: "customer_tag" }
-                                                ]
-                                            },
-                                            {
-                                                title: "Delivery/Shipping",
-                                                options: [
-                                                    { label: "Title", value: "title" }
-                                                ]
-                                            }
-                                        ]}
-                                        value={condition}
-                                        onChange={(value) => setCondition(value)}
-                                    />
-                                </Box>
-                                <Box minWidth="200px">
-                                    <Select
-                                        label=""
-                                        name="operator"
-                                        options={operatorOptions}
-                                        value={operator}
-                                        onChange={(value) => setOperator(value)}
-                                    />
-                                </Box>
-                            </InlineStack>
-                            <TextField
-                                name="value"
-                                value={value}
-                                onChange={(value) => setValue(value)}
-                                placeholder="$300"
-                                required
-                            />
-                            <InlineStack gap="200">
-                                <Button variant="tertiary" size="slim" type="button">
-                                    + Add AND condition
-                                </Button>
-                                <Button variant="tertiary" size="slim" type="button">
-                                    + Add OR condition
-                                </Button>
-                            </InlineStack>
-                            <Select
-                                label="Then..."
-                                name="thenAction"
-                                options={thenActionOptions}
-                                value={thenAction}
-                                onChange={(value) => setThenAction(value)}
-                            />
-                            <Box>
-                                <Button variant="tertiary" size="slim" type="button">
-                                    + Add Action
-                                </Button>
-                            </Box>
-                            <Box paddingBlockStart="400">
-                                <Button variant="primary" size="large" fullWidth type="submit">
-                                    CREATE RULE
-                                </Button>
-                            </Box>
-                        </BlockStack>
-                    </form>
+                    <RuleForm
+                        type={type}
+                        title={title}
+                        setTitle={setTitle}
+                        action={action}
+                        setAction={setAction}
+                        condition={condition}
+                        setCondition={setCondition}
+                        operator={operator}
+                        setOperator={setOperator}
+                        value={value}
+                        setValue={setValue}
+                        thenAction={thenAction}
+                        setThenAction={setThenAction}
+                        navigation={navigation}
+                    />
                 </Box>
             </Card>
         );
@@ -205,73 +142,53 @@ export default function NewRulePage() {
             primaryAction={{ content: "Dashboard", url: "/app" }}
         >
             <BlockStack gap="500">
-                {/* Hide Section: create and list Hide rules */}
+                {/* Hide Rule Card */}
                 <Card>
                     <Box padding="400">
-                        <InlineStack align="space-between">
-                            <Text variant="headingMd" as="h3">Hide</Text>
-                            <Button onClick={() => setFormVisible(formVisible === 'Hide' ? null : 'Hide')}>
-                                Create Customization
-                            </Button>
-                        </InlineStack>
-                        <Box paddingBlockStart="200">
-                            <Text variant="bodyMd" color="subdued">
-                                Total Amount, Subtotal Amount, Total Weight, Total Quantity, Sku, Collections, Country,
-                                Zipcode, City, Total Spend, State/Province Code, Customer Tags, Delivery/Shipping Title,
-                                Total Discount, Discount Rate, Shipping Cost, Currency Code
-                            </Text>
+                        <Text variant="headingMd">Hide</Text>
+                        <Text>{ruleMeta.Hide.join(", ")}</Text>
+                        <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Hide" ? null : "Hide")}>Create Customization</Button>
                         </Box>
+                        {formVisible === "Hide" && renderForm("Hide")}
                     </Box>
                 </Card>
-                {formVisible === 'Hide' && renderForm('Hide')}
-
-                {/* Rename Section: create and list Rename rules */}
+                {/* Rename Rule Card */}
                 <Card>
                     <Box padding="400">
-                        <InlineStack align="space-between">
-                            <Text variant="headingMd" as="h3">Rename</Text>
-                            <Button onClick={() => setFormVisible(formVisible === 'Rename' ? null : 'Rename')}>
-                                Create Customization
-                            </Button>
-                        </InlineStack>
-                        <Box paddingBlockStart="200">
-                            <Text variant="bodyMd" color="subdued">
-                                Always, Country, Language, Customer Tags
-                            </Text>
+                        <Text variant="headingMd">Rename</Text>
+                        <Text>{ruleMeta.Rename.join(", ")}</Text>
+                        <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Rename" ? null : "Rename")}>Create Customization</Button>
                         </Box>
+                        {formVisible === "Rename" && renderForm("Rename")}
                     </Box>
                 </Card>
-                {formVisible === 'Rename' && renderForm('Rename')}
-
-                {/* Sort Section: create and list Sort rules */}
+                {/* Sort Rule Card */}
                 <Card>
                     <Box padding="400">
-                        <InlineStack align="space-between">
-                            <Text variant="headingMd" as="h3">Sort</Text>
-                            <Button onClick={() => setFormVisible(formVisible === 'Sort' ? null : 'Sort')}>
-                                Create Customization
-                            </Button>
-                        </InlineStack>
-                        <Box paddingBlockStart="200">
-                            <Text variant="bodyMd" color="subdued">
-                                Country, Shipping Title
-                            </Text>
+                        <Text variant="headingMd">Sort</Text>
+                        <Text>{ruleMeta.Sort.join(", ")}</Text>
+                        <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Sort" ? null : "Sort")}>Create Customization</Button>
                         </Box>
+                        {formVisible === "Sort" && renderForm("Sort")}
                     </Box>
                 </Card>
-                {formVisible === 'Sort' && renderForm('Sort')}
             </BlockStack>
             <Modal
                 open={modalActive}
-                onClose={() => setModalActive(false)}
+                onClose={handleCloseModal}
                 title="Rule Saved"
-                primaryAction={{ content: "OK", onAction: () => setModalActive(false) }}
+                primaryAction={{
+                    content: "OK",
+                    onAction: handleCloseModal
+                }}
             >
                 <Modal.Section>
-                    <Text variant="bodyMd">Rule has been saved. You can now manually activate it.</Text>
+                    <Text variant="bodyMd">Your rule has been saved and can be activated from the dashboard.</Text>
                 </Modal.Section>
             </Modal>
-            console.log('[app.createPaymentRules.jsx] Returning main JSX');
         </Page>
     );
 }

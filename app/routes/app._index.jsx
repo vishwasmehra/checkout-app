@@ -3,50 +3,72 @@
 
 // Import core UI components from Shopify Polaris for layout, buttons, cards, and icons
 import {
-  Page, Card, Button, BlockStack, InlineStack, Text, Box, Badge, DataTable, ButtonGroup, Icon, Select
+  Page, Card, Button, BlockStack, InlineStack, Text, Box, Badge, DataTable, ButtonGroup, Icon, Select, Modal, TextField
 } from "@shopify/polaris";
 // Import specific icons for use in action buttons
 import { PlusIcon, EditIcon, DeleteIcon } from "@shopify/polaris-icons";
 // Import React's useState for managing local component state
 import { useState, useEffect } from "react";
+import { json } from "@remix-run/node";
+import { useLoaderData, Form, useNavigation } from "@remix-run/react";
+import { parse } from "cookie";
+import prisma from "~/db.server";
+import RuleForm from "../RuleForm";
+
+// Loader to get language from cookie
+export async function loader({ request }) {
+  const cookieHeader = request.headers.get("Cookie") || "";
+  const { parse } = await import("cookie");
+  const cookies = parse(cookieHeader);
+  const language = cookies.language || "en";
+  // Fetch rules from the database
+  const rules = await prisma.rule.findMany({ orderBy: { createdAt: "desc" } });
+  return json({ language, rules });
+}
+
+export async function action({ request }) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  if (intent === "delete") {
+    const id = formData.get("id");
+    await prisma.rule.delete({ where: { id: String(id) } });
+    return json({ success: true });
+  }
+  if (intent === "edit") {
+    const id = formData.get("id");
+    await prisma.rule.update({
+      where: { id: String(id) },
+      data: {
+        title: formData.get("title"),
+        ruleSetType: formData.get("action"),
+        condition: formData.get("condition"),
+        operator: formData.get("operator"),
+        value: formData.get("value"),
+        thenAction: formData.get("thenAction")
+      }
+    });
+    return json({ success: true });
+  }
+  if (intent === "toggle") {
+    const id = formData.get("id");
+    const status = formData.get("status") === 'true';
+    await prisma.rule.update({
+      where: { id: String(id) },
+      data: { status }
+    });
+    return json({ success: true });
+  }
+  return json({});
+}
 
 // Main dashboard component
 export default function DashboardPage() {
-  console.log('[app._index.jsx] Component: Render start');
-  // State for rules displayed in the table
-  const [rules, setRules] = useState([
-    {
-      id: 1,
-      title: "ertetr",
-      ruleSetType: "Hide",
-      status: true
-    },
-    {
-      id: 2,
-      title: "alpha",
-      ruleSetType: "Sort",
-      status: false
-    },
-    {
-      id: 3,
-      title: "beta",
-      ruleSetType: "Rename",
-      status: true
-    },
-    {
-      id: 4,
-      title: "gamma",
-      ruleSetType: "Hide",
-      status: false
-    },
-    {
-      id: 5,
-      title: "delta",
-      ruleSetType: "Sort",
-      status: true
-    },
-  ]);
-  const [language, setLanguage] = useState("en");
+  const { language: initialLanguage, rules } = useLoaderData();
+  const [language, setLanguage] = useState(initialLanguage);
+  const navigation = useNavigation();
+  const [editModalActive, setEditModalActive] = useState(false);
+  const [editRule, setEditRule] = useState(null);
+  const [editFields, setEditFields] = useState({ title: '', ruleSetType: '', condition: '', operator: '', value: '', thenAction: '' });
 
   // Translation dictionary
   const translations = {
@@ -119,55 +141,82 @@ export default function DashboardPage() {
   // Translation function
   const t = (key) => translations[language][key] || key;
 
-  // Toggle the enabled/disabled status of a rule by its ID
-  const toggleRuleStatus = (ruleId) => {
-    setRules(prevRules =>
-      prevRules.map(rule =>
-        rule.id === ruleId ? { ...rule, status: !rule.status } : rule
-      )
-    );
+  // Handler to open edit modal
+  const handleEdit = (rule) => {
+    setEditRule(rule);
+    setEditFields({
+      title: rule.title || '',
+      ruleSetType: rule.ruleSetType || '',
+      condition: rule.condition || '',
+      operator: rule.operator || '',
+      value: rule.value || '',
+      thenAction: rule.thenAction || ''
+    });
+    setEditModalActive(true);
   };
 
-  // Delete a rule by its ID
-  const deleteRule = (ruleId) => {
-    setRules(prevRules => prevRules.filter(rule => rule.id !== ruleId));
+  // Handler to toggle status
+  const handleToggleStatus = async (rule) => {
+    await fetch(`/app?_data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        intent: 'toggle',
+        id: rule.id,
+        status: (!rule.status).toString()
+      })
+    });
+    window.location.reload();
   };
+
+  // Use rules from loader for table and counts
+  const hideTotal = rules.filter(r => r.ruleSetType === "Hide").length;
+  const hideActive = rules.filter(r => r.ruleSetType === "Hide" && r.status).length;
+  const sortTotal = rules.filter(r => r.ruleSetType === "Sort").length;
+  const sortActive = rules.filter(r => r.ruleSetType === "Sort" && r.status).length;
+  const renameTotal = rules.filter(r => r.ruleSetType === "Rename").length;
+  const renameActive = rules.filter(r => r.ruleSetType === "Rename" && r.status).length;
 
   // Prepare table rows for displaying rules and their actions
   const tableRows = rules.map(rule => [
     rule.title,
     rule.ruleSetType,
-    <Button
-      key={`toggle-${rule.id}`}
-      variant={rule.status ? "primary" : "tertiary"}
-      size="slim"
-      onClick={() => toggleRuleStatus(rule.id)}
-    >
-      {rule.status ? "Enabled" : "Disabled"}
-    </Button>,
-    <InlineStack key={`actions-${rule.id}`} gap="200">
+    <Form method="post" key={`toggle-status-${rule.id}`}>
+      <input type="hidden" name="intent" value="toggle" />
+      <input type="hidden" name="id" value={rule.id} />
+      <input type="hidden" name="status" value={!rule.status} />
       <Button
-        variant="tertiary"
+        variant={rule.status ? "primary" : "tertiary"}
         size="slim"
-        icon={EditIcon}
-        onClick={() => console.log(`Edit rule ${rule.id}`)}
-        accessibilityLabel="Edit rule"
-      />
-      <Button
-        variant="tertiary"
-        size="slim"
-        tone="critical"
-        icon={DeleteIcon}
-        onClick={() => deleteRule(rule.id)}
-        accessibilityLabel="Delete rule"
-      />
-    </InlineStack>
+        submit
+      >
+        {rule.status ? t("enabled") : t("disabled")}
+      </Button>
+    </Form>,
+    <ButtonGroup key={`actions-${rule.id}`}>
+      <Button plain icon={EditIcon} onClick={() => handleEdit(rule)} />
+      <Form method="post">
+        <input type="hidden" name="id" value={rule.id} />
+        <input type="hidden" name="intent" value="delete" />
+        <Button
+          variant="tertiary"
+          size="slim"
+          tone="critical"
+          accessibilityLabel="Delete rule"
+          submit
+          loading={navigation.state === 'submitting'}
+        >
+          🗑️
+        </Button>
+      </Form>
+    </ButtonGroup>
   ]);
 
-  // Calculate dynamic counts for each rule type
-  const hideCount = rules.filter(r => r.ruleSetType === "Hide").length;
-  const sortCount = rules.filter(r => r.ruleSetType === "Sort").length;
-  const renameCount = rules.filter(r => r.ruleSetType === "Rename").length;
+  // On language change, update cookie and state
+  function handleLanguageChange(newLang) {
+    setLanguage(newLang);
+    document.cookie = `language=${newLang}; path=/;`;
+  }
 
   // Main dashboard layout with navigation, status cards, and rules table
   return (
@@ -190,7 +239,7 @@ export default function DashboardPage() {
                 icon={PlusIcon}
                 url="/app/createPaymentRules"
               >
-                {t("createPayment")}
+                {t("createRule")}
               </Button>
               <Button variant="tertiary">{t("settings")}</Button>
               <Button variant="tertiary">{t("helpDocs")}</Button>
@@ -201,7 +250,7 @@ export default function DashboardPage() {
                   labelHidden
                   options={languageOptions}
                   value={language}
-                  onChange={setLanguage}
+                  onChange={handleLanguageChange}
                 />
               </Box>
             </InlineStack>
@@ -224,25 +273,22 @@ export default function DashboardPage() {
             <Box padding="400" minWidth="260px">
               <Text variant="bodyMd" color="subdued">{t("yourRules")}</Text>
               <InlineStack gap="200" align="center" blockAlign="center">
-                <Box textAlign="center">
+                <Box style={{ textAlign: "center" }}>
                   <Text variant="bodySm" color="subdued" as="div">{t("hide")}</Text>
                   <Box>
-                    <Text variant="headingMd" as="span">{hideCount}</Text>
-                    <Text variant="bodySm" as="span" color="subdued"> /2</Text>
+                    <Text variant="headingMd" as="span">{hideActive}/{hideTotal}</Text>
                   </Box>
                 </Box>
-                <Box textAlign="center">
+                <Box style={{ textAlign: "center" }}>
                   <Text variant="bodySm" color="subdued" as="div">{t("sort")}</Text>
                   <Box>
-                    <Text variant="headingMd" as="span">{sortCount}</Text>
-                    <Text variant="bodySm" as="span" color="subdued"> /2</Text>
+                    <Text variant="headingMd" as="span">{sortActive}/{sortTotal}</Text>
                   </Box>
                 </Box>
-                <Box textAlign="center">
+                <Box style={{ textAlign: "center" }}>
                   <Text variant="bodySm" color="subdued" as="div">{t("rename")}</Text>
                   <Box>
-                    <Text variant="headingMd" as="span">{renameCount}</Text>
-                    <Text variant="bodySm" as="span" color="subdued"> /2</Text>
+                    <Text variant="headingMd" as="span">{renameActive}/{renameTotal}</Text>
                   </Box>
                 </Box>
               </InlineStack>
@@ -255,7 +301,6 @@ export default function DashboardPage() {
           <Box padding="400">
             <BlockStack gap="400">
               <Text variant="headingLg" as="h2">{t("activeRulesSummary")}</Text>
-
               {rules.length > 0 ? (
                 <DataTable
                   columnContentTypes={['text', 'text', 'text', 'text']}
@@ -263,19 +308,10 @@ export default function DashboardPage() {
                   rows={tableRows}
                 />
               ) : (
-                <Box padding="800" textAlign="center">
+                <Box padding="800" style={{ textAlign: 'center' }}>
                   <Text variant="bodyMd" color="subdued">
                     {t("noActiveRules")}
                   </Text>
-                  <Box paddingBlockStart="400">
-                    <Button
-                      variant="primary"
-                      icon={PlusIcon}
-                      url="/app/new-rules"
-                    >
-                      {t("createRule")}
-                    </Button>
-                  </Box>
                 </Box>
               )}
             </BlockStack>
@@ -301,7 +337,36 @@ export default function DashboardPage() {
           </Box>
         </Card>
       </BlockStack>
-      console.log('[app._index.jsx] Returning main JSX');
+      <Modal
+        open={editModalActive}
+        onClose={() => setEditModalActive(false)}
+        title="Edit Rule"
+        primaryAction={undefined}
+      >
+        <Modal.Section>
+          {editRule && (
+            <RuleForm
+              type={editFields.ruleSetType}
+              title={editFields.title}
+              setTitle={v => setEditFields(f => ({ ...f, title: v }))}
+              action={editFields.ruleSetType}
+              setAction={v => setEditFields(f => ({ ...f, ruleSetType: v }))}
+              condition={editFields.condition}
+              setCondition={v => setEditFields(f => ({ ...f, condition: v }))}
+              operator={editFields.operator}
+              setOperator={v => setEditFields(f => ({ ...f, operator: v }))}
+              value={editFields.value}
+              setValue={v => setEditFields(f => ({ ...f, value: v }))}
+              thenAction={editFields.thenAction}
+              setThenAction={v => setEditFields(f => ({ ...f, thenAction: v }))}
+              navigation={navigation}
+              isEdit={true}
+              editId={editRule.id}
+              editIntent="edit"
+            />
+          )}
+        </Modal.Section>
+      </Modal>
     </Page>
   );
 }
