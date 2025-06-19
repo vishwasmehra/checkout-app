@@ -8,6 +8,7 @@ import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { NavMenu } from "@shopify/app-bridge-react";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { authenticate } from "../shopify.server";
+import * as indexRoute from "./app._index.jsx";
 
 // Provide Polaris styles to the app
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
@@ -55,3 +56,5 @@ export const headers = (headersArgs) => {
   console.log("[app.jsx] headers: Called");
   return boundary.headers(headersArgs);
 };
+
+export const action = indexRoute.action;

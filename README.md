@@ -1,91 +1,56 @@
-## Version g0.2 (Unreleased)
+# Payment Customization App
 
-### Major Changes Since Last Push
+## Version: g0.3
 
-- **Dashboard & Rule Management**
-  - The dashboard now displays only one edit icon per rule row (no duplicates).
-  - Edit modal uses a single, shared `RuleForm` component for editing rules, with proper validation and field mapping.
-  - Edit modal no longer causes nested form warnings; all hidden fields are handled inside `RuleForm`.
-  - The "Create Payment Customization" button on the dashboard now redirects to `/app/createPaymentRules` instead of opening an inline form.
+### Changelog (since last push)
 
-- **RuleForm Refactor**
-  - Extracted a shared `RuleForm.jsx` component, used for both creating and editing rules.
-  - Added client-side validation (title required) and ensured all form fields are correctly named for Remix actions.
-  - `RuleForm` now accepts `editId` and `editIntent` props for hidden fields, preventing nested forms.
+- **Centralized Translation System**
+  - Added `app/translations.js` with a `translations` object and `t(language, key)` helper for all UI text.
+  - All main app pages now use the translation helper for UI text.
+  - Added and completed translations for 15 languages, including Turkish, Korean, Dutch, and Polish.
 
-- **Prisma & Database**
-  - Updated `prisma/schema.prisma` to add missing fields (`condition`, `operator`, `value`, `thenAction`) to the `Rule` model.
-  - Added and ran new migrations:
-    - `20250619090053_add_rule_model/`
-    - `20250619094347_add_rule_fields/`
-    - `migration_lock.toml`
+- **Language Persistence**
+  - Language preference is now stored in the session and persists across all pages and sessions.
+  - All loaders for main app pages fetch the language from the session or cookie.
 
-- **Bug Fixes & Robustness**
-  - Fixed hydration and server/client import errors in Remix route files.
-  - Ensured server-only code (like Prisma) is only imported inside loaders/actions.
-  - Fixed 405 errors by ensuring all form submissions use Remix `<Form>` and not fetch.
-  - Removed duplicate edit icons and ensured only one edit button per row.
-  - Fixed edit modal so that edits persist and update the database correctly.
+- **UI Updates**
+  - Language selector dropdown now matches the supported languages in `translations.js`.
+  - All UI text, table headings, field names, and example rules are sourced from the translation object.
+  - Improved language switching and debugging for missing translations.
 
-- **UI/UX Improvements**
-  - Edit modal's save button is now small and says "Save" (not "Create Rule").
-  - All dashboard actions (edit, enable/disable, delete) are now interactive and robust.
-  - Cleaned up dashboard logic for rule counts and summary cards.
+- **Database and Schema**
+  - Updated `prisma/schema.prisma` to support session language.
+  - Added new migration for session language support.
 
-- **New/Changed Files**
-  - `app/RuleForm.jsx` (new shared form component)
-  - `prisma/migrations/20250619090053_add_rule_model/`
-  - `prisma/migrations/20250619094347_add_rule_fields/`
-  - `prisma/migrations/migration_lock.toml`
-
----
-
-## Version g0.1 (Unreleased)
-
-### New Features & Improvements
-
-- **Language Dropdown:**
-  - Added a language selector (15 languages, default English) to the dashboard navigation, right of the Support button.
-  - All dashboard text is now dynamically translated based on the selected language.
-
-- **API Logic for Shopify Data:**
-  - Created `shopifyApiLogic.server.js` with:
-    - `getCartValue(cartId)`: Fetches cart value from Shopify Storefront API.
-    - `getShippingPin(orderId)`: Fetches shipping postal code from Shopify Admin API.
-  - These functions are used server-side for secure data access.
-
-- **Cart & Shipping Info Page:**
-  - Added `/app/cartShippingInfo` page.
-  - Allows user to input Cart ID and Order ID, fetches and displays cart value and shipping pin using the new API logic.
-
-- **Navigation Improvements:**
-  - Added navigation button to Cart & Shipping Info page (if not already present).
-  - Cleaned up dashboard navigation and UI for better usability.
-
-- **Internationalization (i18n) Foundation:**
-  - Translation logic is component-based and ready for extension to other pages.
-
-- **Project Configuration:**
-  - Added `jsconfig.json` and updated `vite.config.js` to support `~` alias for root-relative imports from the `app` directory.
+- **Other Affected Files**
+  - `app/routes/app._index.jsx`
+  - `app/routes/app.createPaymentRules.jsx`
+  - `app/routes/app.jsx`
+  - `app/routes/app.quickSetup.jsx`
+  - `app/routes/app.support.jsx`
+  - `prisma/schema.prisma`
+  - `shopify.app.toml`
+  - `app/translations.js` (new)
 
 ---
 
 ## How to Use
-
-- **Language Selector:**
-  - Use the dropdown in the dashboard navigation to change the app language instantly.
-- **Cart & Shipping Info:**
-  - Go to `/app/cartShippingInfo`, enter a Cart ID or Order ID, and fetch live data from Shopify.
-- **API Logic:**
-  - Use `getCartValue` and `getShippingPin` in server-side code (loaders, actions, webhooks, etc.).
+- Select your preferred language from the dropdown. The UI will update and remember your choice.
+- All payment customization features are now available in 15 languages.
 
 ---
 
-## Next Steps
-- Extend language support to all pages.
-- Add persistence for language selection (e.g., via cookies or session).
-- Further integrate API logic for automation and rule engine features.
+## How to Contribute
+- To add or improve translations, edit `app/translations.js`.
+- For new features, update the relevant route/component and ensure all UI text uses the translation helper.
 
 ---
 
-**Version:** g0.1
+## Setup
+- See `prisma/schema.prisma` for database schema.
+- Run migrations as needed for new session language support.
+
+---
+
+## License
+MIT

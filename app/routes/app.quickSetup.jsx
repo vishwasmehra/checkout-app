@@ -20,20 +20,34 @@ import {
 import { PlusIcon } from "@shopify/polaris-icons";
 // Import React's useState for local state management
 import { useState } from "react";
+import { useLoaderData } from "@remix-run/react";
+import { authenticate } from "../shopify.server";
+import prisma from "~/db.server";
+import { t, translations } from "../translations";
+
+export async function loader({ request }) {
+    const { session } = await authenticate.admin(request);
+    let language = "en";
+    if (session) {
+        const dbSession = await prisma.session.findUnique({ where: { id: session.id } });
+        if (dbSession && dbSession.language) language = dbSession.language;
+    }
+    if (!language) {
+        const cookieHeader = request.headers.get("Cookie") || "";
+        const { parse } = await import("cookie");
+        const cookies = parse(cookieHeader);
+        language = cookies.language || "en";
+    }
+    return { language };
+}
 
 // Main component for the Quick Setup page
 export default function CreateRulePage() {
+    const { language } = useLoaderData();
     console.log('[app.quickSetup.jsx] Component: Render start');
     // State for available templates and selected templates
-    const [templateRules, setTemplateRules] = useState([
-        "Hide COD when cart total reaches",
-        "Hide COD for Internation Customers",
-        "Welcome to my youtube channel",
-        "Hide Express Checkout Option",
-        "xyz",
-        "zzz",
-    ]);
     const [selectedTemplates, setSelectedTemplates] = useState([]);
+    const templateRules = translations[language].exampleRules;
     // State for custom rule fields
     const [customRule, setCustomRule] = useState({
         title: "whoremember",
@@ -56,11 +70,11 @@ export default function CreateRulePage() {
 
     // Main layout: template selection, custom rule form, and navigation
     return (
-        <Page title="Create New Rule">
+        <Page title={t(language, "quickSetup")}>
             <BlockStack gap="500">
                 {/* Navigation button to go back to dashboard */}
                 <InlineStack gap="300" wrap={false}>
-                    <Button variant="secondary" url="/app" >Dashboard</Button>
+                    <Button variant="secondary" url="/app" >{t(language, "dashboard")}</Button>
                 </InlineStack>
 
                 {/* Card for selecting premade templates */}
@@ -68,7 +82,7 @@ export default function CreateRulePage() {
                     <Box padding="400">
                         <BlockStack gap="400">
                             <Text variant="headingLg" as="h2">
-                                Premade Template
+                                {t(language, "premadeTemplate")}
                             </Text>
                             {/* List of template rules with checkboxes */}
                             {templateRules.map((label, idx) => (
@@ -80,7 +94,7 @@ export default function CreateRulePage() {
                                 />
                             ))}
 
-                            <Button variant="secondary" onClick={() => console.log("[app.quickSetup.jsx] Button: Apply clicked")}>Apply</Button>
+                            <Button variant="secondary" onClick={() => console.log("[app.quickSetup.jsx] Button: Apply clicked")}>{t(language, "apply")}</Button>
                         </BlockStack>
                     </Box>
                 </Card>
@@ -90,18 +104,18 @@ export default function CreateRulePage() {
                     <Box padding="400">
                         <BlockStack gap="400">
                             <Text variant="headingLg" as="h2">
-                                Custom tailored Rules
+                                {t(language, "customTailoredRules")}
                             </Text>
 
                             <TextField
-                                label="Title..."
+                                label={t(language, "title")}
                                 value={customRule.title}
                                 onChange={(val) => setCustomRule({ ...customRule, title: val })}
                                 autoComplete="off"
                             />
 
                             <Select
-                                label="Choose..."
+                                label={t(language, "choose")}
                                 options={["Hide", "Show"]}
                                 value={customRule.action}
                                 onChange={(val) => setCustomRule({ ...customRule, action: val })}
@@ -109,7 +123,7 @@ export default function CreateRulePage() {
 
                             <InlineStack gap="200">
                                 <Select
-                                    label="When..."
+                                    label={t(language, "when")}
                                     options={[
                                         {
                                             title: "Cart Details",
@@ -159,7 +173,7 @@ export default function CreateRulePage() {
                                 />
 
                                 <Select
-                                    label="is"
+                                    label={t(language, "is")}
                                     options={[
                                         "equal or greater than",
                                         "less than",
@@ -181,12 +195,12 @@ export default function CreateRulePage() {
                             />
 
                             <InlineStack gap="200">
-                                <Button icon={PlusIcon}>Add AND condition</Button>
-                                <Button icon={PlusIcon}>Add OR condition</Button>
+                                <Button icon={PlusIcon}>{t(language, "addANDcondition")}</Button>
+                                <Button icon={PlusIcon}>{t(language, "addORcondition")}</Button>
                             </InlineStack>
 
                             <Select
-                                label="Then..."
+                                label={t(language, "then")}
                                 options={[
                                     "Hide specific payment method",
                                     "Show specific payment method",
@@ -198,16 +212,16 @@ export default function CreateRulePage() {
                                 }
                             />
 
-                            <Button icon={PlusIcon}>Add Action</Button>
+                            <Button icon={PlusIcon}>{t(language, "addAction")}</Button>
                         </BlockStack>
                     </Box>
                 </Card>
 
                 {/* Action buttons for creating rule and navigation */}
                 <InlineStack align="end">
-                    <Button variant="primary" onClick={() => console.log("[app.quickSetup.jsx] Button: CREATE RULE clicked")}>CREATE RULE</Button>
+                    <Button variant="primary" onClick={() => console.log("[app.quickSetup.jsx] Button: CREATE RULE clicked")}>{t(language, "createRule")}</Button>
                 </InlineStack>
-                <Button variant="tertiary">Back</Button>
+                <Button variant="tertiary">{t(language, "back")}</Button>
             </BlockStack>
             console.log('[app.quickSetup.jsx] Returning main JSX');
         </Page>

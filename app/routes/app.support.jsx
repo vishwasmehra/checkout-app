@@ -8,23 +8,33 @@ import { useState, useEffect } from "react";
 // Import Remix Link for navigation
 import { Link } from "@remix-run/react";
 import { useLoaderData } from "@remix-run/react";
-
-// Server-only imports
-// Only used in the loader, not in the component
-// Do NOT import these in the component body or any file imported by the component
-import { json } from "@remix-run/node";
+import { authenticate } from "../shopify.server";
 import prisma from "~/db.server";
+import { t } from "../translations";
 
-export async function loader() {
+export async function loader({ request }) {
+    const { session } = await authenticate.admin(request);
+    let language = "en";
+    if (session) {
+        const dbSession = await prisma.session.findUnique({ where: { id: session.id } });
+        if (dbSession && dbSession.language) language = dbSession.language;
+    }
+    if (!language) {
+        const cookieHeader = request.headers.get("Cookie") || "";
+        const { parse } = await import("cookie");
+        const cookies = parse(cookieHeader);
+        language = cookies.language || "en";
+    }
+    // Also fetch rules as before
     const rules = await prisma.rule.findMany({ orderBy: { createdAt: "desc" } });
-    return json({ rules });
+    return { language, rules };
 }
 
 // Main component for the Support page
 export default function SupportPage() {
     console.log('[app.support.jsx] Component: Render start');
     // Only use useLoaderData and client-safe hooks in the component
-    const { rules } = useLoaderData();
+    const { language, rules } = useLoaderData();
     const [searchValue, setSearchValue] = useState("");
     const [showActive, setShowActive] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
@@ -65,47 +75,47 @@ export default function SupportPage() {
 
     // Main layout: support cards, rules table, and navigation
     return (
-        <Page title="Support">
+        <Page title={t(language, "support")}>
             <BlockStack gap="500">
                 {/* Summary cards at the top */}
                 <InlineStack gap="400" align="start">
                     <Card>
                         <Box padding="400" minWidth="260px">
-                            <Text variant="bodyMd" color="subdued">Active Payment Customizations</Text>
+                            <Text variant="bodyMd" color="subdued">{t(language, "activePaymentCustomizations")}</Text>
                             <Box paddingBlockStart="200">
                                 <Text variant="headingLg" as="span">0</Text>
-                                <Text variant="bodyMd" as="span"> /5 Our App active delivery rule(s)</Text>
+                                <Text variant="bodyMd" as="span"> /5 {t(language, "ourAppActiveDeliveryRule")}(s)</Text>
                             </Box>
                         </Box>
                     </Card>
                     <Card>
                         <Box padding="400" minWidth="260px">
-                            <Text variant="bodyMd" color="subdued">Add new customization</Text>
+                            <Text variant="bodyMd" color="subdued">{t(language, "addNewCustomization")}</Text>
                             <Box paddingBlockStart="200">
-                                <Button variant="primary" url="/app/createPaymentRules">Create Payment Customization</Button>
+                                <Button variant="primary" url="/app/createPaymentRules">{t(language, "createPaymentCustomization")}</Button>
                             </Box>
                         </Box>
                     </Card>
                     <Card>
                         <Box padding="400" minWidth="260px">
-                            <Text variant="bodyMd" color="subdued">Your activated / created rules count.</Text>
+                            <Text variant="bodyMd" color="subdued">{t(language, "yourActivatedCreatedRulesCount")}</Text>
                             <InlineStack gap="200" align="center" blockAlign="center">
                                 <Box style={{ textAlign: "center" }}>
-                                    <Text variant="bodySm" color="subdued" as="div">Hide</Text>
+                                    <Text variant="bodySm" color="subdued" as="div">{t(language, "hide")}</Text>
                                     <Box>
                                         <Text variant="headingMd" as="span">{hideCount}</Text>
                                         <Text variant="bodySm" as="span" color="subdued"> /2</Text>
                                     </Box>
                                 </Box>
                                 <Box style={{ textAlign: "center" }}>
-                                    <Text variant="bodySm" color="subdued" as="div">Sort</Text>
+                                    <Text variant="bodySm" color="subdued" as="div">{t(language, "sort")}</Text>
                                     <Box>
                                         <Text variant="headingMd" as="span">{sortCount}</Text>
                                         <Text variant="bodySm" as="span" color="subdued"> /2</Text>
                                     </Box>
                                 </Box>
                                 <Box style={{ textAlign: "center" }}>
-                                    <Text variant="bodySm" color="subdued" as="div">Rename</Text>
+                                    <Text variant="bodySm" color="subdued" as="div">{t(language, "rename")}</Text>
                                     <Box>
                                         <Text variant="headingMd" as="span">{renameCount}</Text>
                                         <Text variant="bodySm" as="span" color="subdued"> /2</Text>
@@ -120,7 +130,7 @@ export default function SupportPage() {
                 <Box paddingBlockStart="400">
                     <TextField
                         prefix={<span role="img" aria-label="search">🔍</span>}
-                        placeholder="Search"
+                        placeholder={t(language, "search")}
                         value={searchValue}
                         onChange={setSearchValue}
                         autoComplete="off"
@@ -132,23 +142,23 @@ export default function SupportPage() {
                         columnContentTypes={["text", "text", "text", "text"]}
                         headings={["Title", "Rule Set Type", "Status", "Action"]}
                         rows={tableRows}
-                        footerContent={`Showing ${displayedRules.length} of ${rules.length} results`}
+                        footerContent={`${t(language, "showing")} ${displayedRules.length} ${t(language, "of")} ${rules.length} ${t(language, "results")}`}
                     />
                 </Box>
 
                 {/* Limitations/info card at the bottom */}
                 <Card>
                     <Box padding="400">
-                        <Text variant="headingMd">Limitations</Text>
+                        <Text variant="headingMd">{t(language, "limitations")}</Text>
                         <ul style={{ marginTop: 16, marginBottom: 0, paddingLeft: 20 }}>
-                            <li>The Payment Customization API doesn't currently support draft orders.</li>
-                            <li>You can't rename payment methods that have logos.</li>
-                            <li>Payment customizations aren't compatible with Shop Pay (Mobile App).</li>
-                            <li>You can activate only 5 Payment customization methods at a time.</li>
-                            <li>APP do not hide express checkout button, you have to disable it from Shopify's settings.</li>
+                            <li>{t(language, "paymentCustomizationAPIDoesntCurrentlySupportDraftOrders")}</li>
+                            <li>{t(language, "youCantRenamePaymentMethodsThatHaveLogos")}</li>
+                            <li>{t(language, "paymentCustomizationsArentCompatibleWithShopPayMobileApp")}</li>
+                            <li>{t(language, "youCanActivateOnly5PaymentCustomizationMethodsAtATime")}</li>
+                            <li>{t(language, "appDoNotHideExpressCheckoutButtonYouHaveToDisableItFromShopifySSettings")}</li>
                         </ul>
                         <Text variant="bodyMd" color="subdued" style={{ marginTop: 16, display: 'block' }}>
-                            Once Shopify will launch the update, we will update our app accordingly.
+                            {t(language, "onceShopifyWillLaunchTheUpdateWeWillUpdateOurAppAccordingly")}
                         </Text>
                     </Box>
                 </Card>

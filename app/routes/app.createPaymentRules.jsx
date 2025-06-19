@@ -16,8 +16,11 @@ import {
 } from "@shopify/polaris";
 // Import React's useState for local state management
 import { useState, useEffect } from "react";
-import { useActionData, Form, useNavigation } from "@remix-run/react";
+import { useActionData, Form, useNavigation, useLoaderData } from "@remix-run/react";
 import RuleForm from "../RuleForm";
+import { authenticate } from "../shopify.server";
+import prisma from "~/db.server";
+import { t, translations } from "../translations";
 
 console.log('[app.createPaymentRules.jsx] Component: Render start');
 
@@ -47,10 +50,27 @@ export async function action({ request }) {
     return json({ success: true, rule });
 }
 
+export async function loader({ request }) {
+    const { session } = await authenticate.admin(request);
+    let language = "en";
+    if (session) {
+        const dbSession = await prisma.session.findUnique({ where: { id: session.id } });
+        if (dbSession && dbSession.language) language = dbSession.language;
+    }
+    if (!language) {
+        const cookieHeader = request.headers.get("Cookie") || "";
+        const { parse } = await import("cookie");
+        const cookies = parse(cookieHeader);
+        language = cookies.language || "en";
+    }
+    return { language };
+}
+
 // Main component for the Create Payment Rules page
 export default function NewRulePage() {
     const actionData = useActionData();
     const navigation = useNavigation();
+    const { language } = useLoaderData();
     console.log("[app.createPaymentRules.jsx] Component: Render");
     // State for form visibility and rule fields
     const [formVisible, setFormVisible] = useState(null); // 'Hide', 'Rename', 'Sort' or null
@@ -81,15 +101,9 @@ export default function NewRulePage() {
 
     // Metadata for each rule type
     const ruleMeta = {
-        Hide: [
-            "Total Amount", "Subtotal Amount", "Total Weight", "Total Quantity", "Sku", "Collections", "Country", "Zipcode", "City", "Total Spend", "State/Province Code", "Customer Tags", "Delivery/Shipping Title", "Total Discount", "Discount Rate", "Shipping Cost", "Currency Code"
-        ],
-        Rename: [
-            "Always", "Country", "Language", "Customer Tags"
-        ],
-        Sort: [
-            "Country", "Shipping Title"
-        ]
+        Hide: translations[language].ruleFields,
+        Rename: [t(language, "always"), t(language, "country"), t(language, "language"), t(language, "customerTags")],
+        Sort: [t(language, "country"), t(language, "shippingTitle")],
     };
 
     // Options for select dropdowns in the form
@@ -138,17 +152,17 @@ export default function NewRulePage() {
     return (
         <Page
             backAction={{ content: "Back", url: "/app" }}
-            title="Choose Your Customization"
-            primaryAction={{ content: "Dashboard", url: "/app" }}
+            title={t(language, "chooseCustomization")}
+            primaryAction={{ content: t(language, "dashboard"), url: "/app" }}
         >
             <BlockStack gap="500">
                 {/* Hide Rule Card */}
                 <Card>
                     <Box padding="400">
-                        <Text variant="headingMd">Hide</Text>
+                        <Text variant="headingMd">{t(language, "hide")}</Text>
                         <Text>{ruleMeta.Hide.join(", ")}</Text>
                         <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Hide" ? null : "Hide")}>Create Customization</Button>
+                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Hide" ? null : "Hide")}>{t(language, "createCustomization")}</Button>
                         </Box>
                         {formVisible === "Hide" && renderForm("Hide")}
                     </Box>
@@ -156,10 +170,10 @@ export default function NewRulePage() {
                 {/* Rename Rule Card */}
                 <Card>
                     <Box padding="400">
-                        <Text variant="headingMd">Rename</Text>
+                        <Text variant="headingMd">{t(language, "rename")}</Text>
                         <Text>{ruleMeta.Rename.join(", ")}</Text>
                         <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Rename" ? null : "Rename")}>Create Customization</Button>
+                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Rename" ? null : "Rename")}>{t(language, "createCustomization")}</Button>
                         </Box>
                         {formVisible === "Rename" && renderForm("Rename")}
                     </Box>
@@ -167,10 +181,10 @@ export default function NewRulePage() {
                 {/* Sort Rule Card */}
                 <Card>
                     <Box padding="400">
-                        <Text variant="headingMd">Sort</Text>
+                        <Text variant="headingMd">{t(language, "sort")}</Text>
                         <Text>{ruleMeta.Sort.join(", ")}</Text>
                         <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Sort" ? null : "Sort")}>Create Customization</Button>
+                            <Button variant="secondary" onClick={() => setFormVisible(formVisible === "Sort" ? null : "Sort")}>{t(language, "createCustomization")}</Button>
                         </Box>
                         {formVisible === "Sort" && renderForm("Sort")}
                     </Box>
@@ -179,14 +193,14 @@ export default function NewRulePage() {
             <Modal
                 open={modalActive}
                 onClose={handleCloseModal}
-                title="Rule Saved"
+                title={t(language, "ruleSaved")}
                 primaryAction={{
                     content: "OK",
                     onAction: handleCloseModal
                 }}
             >
                 <Modal.Section>
-                    <Text variant="bodyMd">Your rule has been saved and can be activated from the dashboard.</Text>
+                    <Text variant="bodyMd">{t(language, "ruleSavedMessage")}</Text>
                 </Modal.Section>
             </Modal>
         </Page>
