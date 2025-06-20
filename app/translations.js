@@ -73,6 +73,9 @@ export const translations = {
         language: "Language",
         customerTags: "Customer Tags",
         shippingTitle: "Shipping Title",
+        home: "Home",
+        quickTemplate: "Quick Template",
+        createNewRule: "Create New Rule",
     },
     fr: {
         dashboard: "Tableau de bord",
@@ -135,7 +138,7 @@ export const translations = {
         appDoNotHideExpressCheckoutButtonYouHaveToDisableItFromShopifySSettings: "L'application ne masque pas le bouton de paiement express, vous devez le désactiver dans les paramètres Shopify.",
         onceShopifyWillLaunchTheUpdateWeWillUpdateOurAppAccordingly: "Une fois la mise à jour lancée par Shopify, nous mettrons à jour notre application en conséquence.",
         ruleFields: [
-            "Montant total", "Sous-total", "Poids total", "Quantité totale", "SKU", "Collections", "Pays", "Code postal", "Ville", "Dépense totale", "Code État/Province", "Tags client", "Titre de livraison/expédition", "Remise totale", "Taux de remise", "Coût d'expédition", "Code devise"
+            "Montant total", "Sous-total", "Poids total", "Quantité totale", "SKU", "Collezioni", "Pays", "Code postal", "Ville", "Dépense totale", "Code État/Province", "Tags client", "Titre de livraison/expédition", "Remise totale", "Taux de remise", "Coût d'expédition", "Code devise"
         ],
         exampleRules: [
             "Masquer le paiement à la livraison lorsque le total du panier est atteint",
@@ -148,6 +151,9 @@ export const translations = {
         language: "Langue",
         customerTags: "Tags client",
         shippingTitle: "Titre de livraison",
+        home: "Accueil",
+        quickTemplate: "Modèle rapide",
+        createNewRule: "Créer une nouvelle règle",
     },
     de: {
         dashboard: "Dashboard",
@@ -223,6 +229,9 @@ export const translations = {
         language: "Sprache",
         customerTags: "Kundentags",
         shippingTitle: "Versandtitel",
+        home: "Startseite",
+        quickTemplate: "Schnellvorlage",
+        createNewRule: "Neue Regel erstellen",
     },
     ru: {
         dashboard: "Панель управления",
@@ -298,6 +307,9 @@ export const translations = {
         language: "Язык",
         customerTags: "Теги клиента",
         shippingTitle: "Название доставки",
+        home: "Главная",
+        quickTemplate: "Быстрый шаблон",
+        createNewRule: "Создать новое правило",
     },
     hi: {
         dashboard: "डैशबोर्ड",
@@ -373,6 +385,9 @@ export const translations = {
         language: "भाषा",
         customerTags: "ग्राहक टैग",
         shippingTitle: "शिपिंग शीर्षक",
+        home: "होम",
+        quickTemplate: "त्वरित टेम्पलेट",
+        createNewRule: "नया नियम बनाएं",
     },
     es: {
         dashboard: "Tablero de control",
@@ -448,6 +463,9 @@ export const translations = {
         language: "Idioma",
         customerTags: "Etiquetas de cliente",
         shippingTitle: "Título de envío",
+        home: "Inicio",
+        quickTemplate: "Plantilla rápida",
+        createNewRule: "Crear nueva regla",
     },
     it: {
         dashboard: "Pannello di controllo",
@@ -523,6 +541,9 @@ export const translations = {
         language: "Lingua",
         customerTags: "Tag clienti",
         shippingTitle: "Titolo di spedizione",
+        home: "Home",
+        quickTemplate: "Modello rapido",
+        createNewRule: "Crea nuova regola",
     },
     zh: {
         dashboard: "控制面板",
@@ -598,6 +619,9 @@ export const translations = {
         language: "语言",
         customerTags: "客户标签",
         shippingTitle: "运输标题",
+        home: "首页",
+        quickTemplate: "快速模板",
+        createNewRule: "创建新规则",
     },
     ja: {
         dashboard: "ダッシュボード",
@@ -673,6 +697,9 @@ export const translations = {
         language: "言語",
         customerTags: "顧客タグ",
         shippingTitle: "配送タイトル",
+        home: "ホーム",
+        quickTemplate: "クイックテンプレート",
+        createNewRule: "新しいルールを作成",
     },
     ar: {
         dashboard: "لوحة التحكم",
@@ -748,6 +775,9 @@ export const translations = {
         language: "اللغة",
         customerTags: "علامات العميل",
         shippingTitle: "عنوان التسليم",
+        home: "الرئيسية",
+        quickTemplate: "قالب سريع",
+        createNewRule: "إنشاء قاعدة جديدة",
     },
     pt: {
         dashboard: "Painel de Controle",
@@ -823,6 +853,9 @@ export const translations = {
         language: "Langue",
         customerTags: "Tags client",
         shippingTitle: "Titre de livraison",
+        home: "Início",
+        quickTemplate: "Modelo rápido",
+        createNewRule: "Criar nova regra",
     },
     tr: {
         dashboard: "Gösterge Paneli",
@@ -898,6 +931,9 @@ export const translations = {
         language: "Dil",
         customerTags: "Müşteri Etiketleri",
         shippingTitle: "Kargo Başlığı",
+        home: "Ana Sayfa",
+        quickTemplate: "Hızlı Şablon",
+        createNewRule: "Yeni Kural Oluştur",
     },
     ko: {
         dashboard: "대시보드",
@@ -973,6 +1009,9 @@ export const translations = {
         language: "언어",
         customerTags: "고객 태그",
         shippingTitle: "배송 제목",
+        home: "홈",
+        quickTemplate: "빠른 템플릿",
+        createNewRule: "새 규칙 만들기",
     },
     nl: {
         dashboard: "Dashboard",
@@ -1048,6 +1087,9 @@ export const translations = {
         language: "Taal",
         customerTags: "Klanttags",
         shippingTitle: "Verzendtitel",
+        home: "Home",
+        quickTemplate: "Snel sjabloon",
+        createNewRule: "Nieuwe regel maken",
     },
     pl: {
         dashboard: "Panel",
@@ -1123,6 +1165,9 @@ export const translations = {
         language: "Język",
         customerTags: "Tagi klienta",
         shippingTitle: "Tytuł wysyłki",
+        home: "Strona główna",
+        quickTemplate: "Szybki szablon",
+        createNewRule: "Utwórz nową regułę",
     }
 };
 

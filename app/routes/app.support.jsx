@@ -2,7 +2,7 @@
 // Support page for providing help and resources to users.
 
 // Import UI components from Shopify Polaris for layout, tables, and actions
-import { Page, Card, BlockStack, InlineStack, Text, Box, DataTable, Button, ButtonGroup, TextField, Checkbox } from "@shopify/polaris";
+import { Page, Card, BlockStack, InlineStack, Text, Box, DataTable, Button, ButtonGroup, TextField, Checkbox, Select } from "@shopify/polaris";
 // Import React's useState for local state management
 import { useState, useEffect } from "react";
 // Import Remix Link for navigation
@@ -73,9 +73,51 @@ export default function SupportPage() {
         </ButtonGroup>
     ]);
 
+    const languageOptions = [
+        { label: t(language, "home"), value: "en" },
+        { label: "Français", value: "fr" },
+        { label: "Deutsch", value: "de" },
+        { label: "Русский", value: "ru" },
+        { label: "हिन्दी", value: "hi" },
+        { label: "Español", value: "es" },
+        { label: "Italiano", value: "it" },
+        { label: "中文", value: "zh" },
+        { label: "日本語", value: "ja" },
+        { label: "العربية", value: "ar" },
+        { label: "Português", value: "pt" },
+        { label: "Türkçe", value: "tr" },
+        { label: "한국어", value: "ko" },
+        { label: "Nederlands", value: "nl" },
+        { label: "Polski", value: "pl" }
+    ];
+
     // Main layout: support cards, rules table, and navigation
     return (
-        <Page title={t(language, "support")}>
+        <Page
+            title={t(language, "support")}
+            primaryAction={{ content: t(language, "support"), url: "/app/support" }}
+        >
+            <Card>
+                <Box padding="400">
+                    <InlineStack gap="300" wrap={false}>
+                        <Button variant="secondary" url="/app">{t(language, "home")}</Button>
+                        <Button variant="tertiary" url="/app/quickSetup">{t(language, "quickTemplate")}</Button>
+                        <Button variant="tertiary" url="/app/createPaymentRules">{t(language, "createNewRule")}</Button>
+                        <Button variant="tertiary">{t(language, "settings")}</Button>
+                        <Button variant="tertiary">{t(language, "helpDocs")}</Button>
+                        <Button variant="primary" url="/app/support">{t(language, "support")}</Button>
+                        <Box minWidth="180px">
+                            <Select
+                                label="Language"
+                                labelHidden
+                                options={languageOptions}
+                                value={language}
+                                onChange={() => { }}
+                            />
+                        </Box>
+                    </InlineStack>
+                </Box>
+            </Card>
             <BlockStack gap="500">
                 {/* Summary cards at the top */}
                 <InlineStack gap="400" align="start">

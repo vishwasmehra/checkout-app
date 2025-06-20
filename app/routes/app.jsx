@@ -9,6 +9,8 @@ import { NavMenu } from "@shopify/app-bridge-react";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { authenticate } from "../shopify.server";
 import * as indexRoute from "./app._index.jsx";
+import { Icon } from "@shopify/polaris";
+import { HomeIcon, PlusIcon, SettingsIcon, BookIcon, PhoneIcon, NoteIcon, PageIcon } from "@shopify/polaris-icons";
 
 // Provide Polaris styles to the app
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
@@ -34,10 +36,21 @@ export default function App() {
         <Link to="/app" rel="home">
           Home
         </Link>
-        <Link to="/app/additional">Additional page</Link>
-        <Link to="/app/quickSetup">Quic Setup Wizard</Link>
-        <Link to="/app/createPaymentRules">Create Payment Rule</Link>
-        <Link to="/app/support">Support</Link>
+        <Link to="/app/quickSetup">
+          Quick Template
+        </Link>
+        <Link to="/app/createPaymentRules">
+          Create Payment Rule
+        </Link>
+        <Link to="#">
+          Settings
+        </Link>
+        <Link to="#">
+          Help Docs
+        </Link>
+        <Link to="/app/support">
+          Support
+        </Link>
       </NavMenu>
       {/* Renders the matched child route */}
       <Outlet />

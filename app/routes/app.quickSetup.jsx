@@ -58,6 +58,24 @@ export default function CreateRulePage() {
         thenAction: "Hide specific payment method",
     });
 
+    const languageOptions = [
+        { label: t(language, "home"), value: "en" },
+        { label: "Français", value: "fr" },
+        { label: "Deutsch", value: "de" },
+        { label: "Русский", value: "ru" },
+        { label: "हिन्दी", value: "hi" },
+        { label: "Español", value: "es" },
+        { label: "Italiano", value: "it" },
+        { label: "中文", value: "zh" },
+        { label: "日本語", value: "ja" },
+        { label: "العربية", value: "ar" },
+        { label: "Português", value: "pt" },
+        { label: "Türkçe", value: "tr" },
+        { label: "한국어", value: "ko" },
+        { label: "Nederlands", value: "nl" },
+        { label: "Polski", value: "pl" }
+    ];
+
     // Toggle selection of a template rule
     const handleTemplateToggle = (label) => {
         console.log(`[app.quickSetup.jsx] handleTemplateToggle: label = ${label}`);
@@ -70,13 +88,31 @@ export default function CreateRulePage() {
 
     // Main layout: template selection, custom rule form, and navigation
     return (
-        <Page title={t(language, "quickSetup")}>
+        <Page
+            title={t(language, "quickTemplate")}
+        >
+            <Card>
+                <Box padding="400">
+                    <InlineStack gap="300" wrap={false}>
+                        <Button variant="secondary" url="/app">{t(language, "home")}</Button>
+                        <Button variant="primary" url="/app/quickSetup">{t(language, "quickTemplate")}</Button>
+                        <Button variant="tertiary" url="/app/createPaymentRules">{t(language, "createNewRule")}</Button>
+                        <Button variant="tertiary">{t(language, "settings")}</Button>
+                        <Button variant="tertiary">{t(language, "helpDocs")}</Button>
+                        <Button variant="tertiary" url="/app/support">{t(language, "support")}</Button>
+                        <Box minWidth="180px">
+                            <Select
+                                label="Language"
+                                labelHidden
+                                options={languageOptions}
+                                value={language}
+                                onChange={() => { }}
+                            />
+                        </Box>
+                    </InlineStack>
+                </Box>
+            </Card>
             <BlockStack gap="500">
-                {/* Navigation button to go back to dashboard */}
-                <InlineStack gap="300" wrap={false}>
-                    <Button variant="secondary" url="/app" >{t(language, "dashboard")}</Button>
-                </InlineStack>
-
                 {/* Card for selecting premade templates */}
                 <Card>
                     <Box padding="400">

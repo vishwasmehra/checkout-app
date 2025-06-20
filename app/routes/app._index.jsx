@@ -3,7 +3,7 @@
 
 // Import core UI components from Shopify Polaris for layout, buttons, cards, and icons
 import {
-  Page, Card, Button, BlockStack, InlineStack, Text, Box, Badge, DataTable, ButtonGroup, Icon, Select, Modal, TextField
+  Page, Card, Button, BlockStack, InlineStack, Text, Box, Badge, DataTable, ButtonGroup, Icon, Select, Modal, TextField, Checkbox
 } from "@shopify/polaris";
 // Import specific icons for use in action buttons
 import { PlusIcon, EditIcon, DeleteIcon } from "@shopify/polaris-icons";
@@ -16,6 +16,7 @@ import prisma from "~/db.server";
 import RuleForm from "../RuleForm";
 import { authenticate } from "../shopify.server";
 import { t, translations } from "../translations";
+import ToggleSwitch from "../components/ToggleSwitch";
 
 // Loader to get language from session or cookie
 export async function loader({ request }) {
@@ -99,7 +100,7 @@ export default function DashboardPage() {
 
   // Language options
   const languageOptions = [
-    { label: "English", value: "en" },
+    { label: t(language, "home"), value: "en" },
     { label: "Français", value: "fr" },
     { label: "Deutsch", value: "de" },
     { label: "Русский", value: "ru" },
@@ -153,39 +154,41 @@ export default function DashboardPage() {
   const renameActive = rules.filter(r => r.ruleSetType === "Rename" && r.status).length;
 
   // Prepare table rows for displaying rules and their actions
-  const tableRows = rules.map(rule => [
-    rule.title,
-    rule.ruleSetType,
-    <Form method="post" key={`toggle-status-${rule.id}`}>
-      <input type="hidden" name="intent" value="toggle" />
-      <input type="hidden" name="id" value={rule.id} />
-      <input type="hidden" name="status" value={!rule.status} />
-      <Button
-        variant={rule.status ? "primary" : "tertiary"}
-        size="slim"
-        submit
-      >
-        {rule.status ? t(language, "enabled") : t(language, "disabled")}
-      </Button>
-    </Form>,
-    <ButtonGroup key={`actions-${rule.id}`}>
-      <Button plain icon={EditIcon} onClick={() => handleEdit(rule)} />
-      <Form method="post">
+  const tableRows = rules.map(rule => {
+    let formRef = null;
+    return [
+      rule.title,
+      rule.ruleSetType,
+      <Form method="post" ref={el => (formRef = el)}>
+        <input type="hidden" name="intent" value="toggle" />
         <input type="hidden" name="id" value={rule.id} />
-        <input type="hidden" name="intent" value="delete" />
-        <Button
-          variant="tertiary"
-          size="slim"
-          tone="critical"
-          accessibilityLabel="Delete rule"
-          submit
-          loading={navigation.state === 'submitting'}
-        >
-          🗑️
-        </Button>
-      </Form>
-    </ButtonGroup>
-  ]);
+        <input type="hidden" name="status" value={!rule.status} />
+        <ToggleSwitch
+          checked={rule.status}
+          onChange={() => {
+            if (formRef) formRef.requestSubmit();
+          }}
+        />
+      </Form>,
+      <ButtonGroup key={`actions-${rule.id}`}>
+        <Button plain icon={EditIcon} onClick={() => handleEdit(rule)} />
+        <Form method="post">
+          <input type="hidden" name="id" value={rule.id} />
+          <input type="hidden" name="intent" value="delete" />
+          <Button
+            variant="tertiary"
+            size="slim"
+            tone="critical"
+            accessibilityLabel="Delete rule"
+            submit
+            loading={navigation.state === 'submitting'}
+          >
+            🗑️
+          </Button>
+        </Form>
+      </ButtonGroup>
+    ];
+  });
 
   // On language change, update cookie and state
   async function handleLanguageChange(newLang) {
@@ -199,7 +202,7 @@ export default function DashboardPage() {
   // Main dashboard layout with navigation, status cards, and rules table
   return (
     <Page
-      title={t(language, "landing")}
+      title={t(language, "appTitle")}
       titleMetadata={<Badge tone="info">{t(language, "dashboard")}</Badge>}
     >
       <BlockStack gap="500">
@@ -207,21 +210,12 @@ export default function DashboardPage() {
         <Card>
           <Box padding="400">
             <InlineStack gap="300" wrap={false}>
-              <Button
-                variant="secondary"
-                url="/app/quickSetup"
-              >
-                {t(language, "quickSetup")}</Button>
-              <Button
-                variant="primary"
-                icon={PlusIcon}
-                url="/app/createPaymentRules"
-              >
-                {t(language, "createRule")}
-              </Button>
+              <Button variant="primary" url="/app">{t(language, "home")}</Button>
+              <Button variant="tertiary" url="/app/quickSetup">{t(language, "quickTemplate")}</Button>
+              <Button variant="secondary" url="/app/createPaymentRules">{t(language, "createNewRule")}</Button>
               <Button variant="tertiary">{t(language, "settings")}</Button>
               <Button variant="tertiary">{t(language, "helpDocs")}</Button>
-              <Button variant="tertiary">{t(language, "support")}</Button>
+              <Button variant="tertiary" url="/app/support">{t(language, "support")}</Button>
               <Box minWidth="180px">
                 <Select
                   label="Language"

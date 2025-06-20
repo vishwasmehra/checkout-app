@@ -1,8 +1,19 @@
 # Payment Customization App
 
-## Version: g0.3
+## Version: g0.4
 
 ### Changelog (since last push)
+
+- **Navigation & UI Improvements**
+  - Cleaned up App Bridge NavMenu: now uses only plain text (no icons) for full compatibility and stability.
+  - Removed unsupported or problematic icon imports from navigation and menu items.
+  - Added guidance and support for using icons in custom navigation bars (outside App Bridge NavMenu).
+  - Provided options and examples for colorful edit/delete actions using emojis and button tones.
+- **Bug Fixes**
+  - Fixed errors related to unsupported icon exports (e.g., HomeMajor, TemplateIcon, BlockquoteIcon, ListIcon, etc.).
+  - Resolved App Bridge NavMenu rendering errors caused by custom React components or icons.
+- **Pair Programming & Collaboration**
+  - Added documentation and support for pair programming in Cursor, including Live Share/collaboration features.
 
 - **Centralized Translation System**
   - Added `app/translations.js` with a `translations` object and `t(language, key)` helper for all UI text.
@@ -37,12 +48,14 @@
 ## How to Use
 - Select your preferred language from the dropdown. The UI will update and remember your choice.
 - All payment customization features are now available in 15 languages.
+- For pair programming, use Cursor's Live Share/collaboration features to work with others in real time.
 
 ---
 
 ## How to Contribute
 - To add or improve translations, edit `app/translations.js`.
 - For new features, update the relevant route/component and ensure all UI text uses the translation helper.
+- For collaborative work, use Cursor's built-in sharing features.
 
 ---
 
