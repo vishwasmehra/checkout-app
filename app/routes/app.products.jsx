@@ -14,7 +14,7 @@ export const loader = async ({ request }) => {
 
     // Fetch products from Shopify REST API
     const response = await fetch(
-        `https://${shop}/admin/api/2023-10/products.json`,
+        `https://${shop}/admin/api/2024-07/products.json`,
         {
             headers: {
                 "X-Shopify-Access-Token": accessToken,
