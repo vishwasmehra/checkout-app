@@ -1,8 +1,16 @@
 # Payment Customization App
 
-## Version: g0.4
+## Version: g0.5
 
 ### Changelog (since last push)
+
+- **Navigation and Routing**
+  - Fixed broken navigation links for "Settings" and "Help Docs".
+  - Created new pages and routes for `app/routes/app.settings.jsx` and `app/routes/app.helpdocs.jsx`.
+  - Corrected an issue where the app would incorrectly display the dashboard for settings and help docs routes.
+- **Authentication**
+  - Fixed an authentication issue in `app/routes/app.products.jsx` by replacing a missing `session.server` import with the correct `authenticate.admin` method from Shopify's libraries.
+  - Removed unused imports from `app/routes/app.products.jsx`.
 
 - **Navigation & UI Improvements**
   - Cleaned up App Bridge NavMenu: now uses only plain text (no icons) for full compatibility and stability.

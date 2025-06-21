@@ -42,10 +42,10 @@ export default function App() {
         <Link to="/app/createPaymentRules">
           Create Payment Rule
         </Link>
-        <Link to="#">
+        <Link to="/app/settings">
           Settings
         </Link>
-        <Link to="#">
+        <Link to="/app/helpdocs">
           Help Docs
         </Link>
         <Link to="/app/support">
