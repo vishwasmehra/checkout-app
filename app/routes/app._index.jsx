@@ -210,7 +210,7 @@ export default function DashboardPage() {
         <Card>
           <Box padding="400">
             <InlineStack gap="300" wrap={false}>
-              <Button variant="primary" url="/app">{t(language, "home")}</Button>
+              <Button variant="secondary" url="/app">{t(language, "home")}</Button>
               <Button variant="tertiary" url="/app/quickSetup">{t(language, "quickTemplate")}</Button>
               <Button variant="secondary" url="/app/createPaymentRules">{t(language, "createNewRule")}</Button>
               <Button variant="tertiary">{t(language, "settings")}</Button>
